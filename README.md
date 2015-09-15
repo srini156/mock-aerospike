@@ -1,4 +1,7 @@
 # mock-aersopike
+mock-aerospike implements `MockAerospikeClient` which helps in unit testing.
+Just use `MockAerospikeClient` implementation for the interface `IAerospikeClient` in your unit tests.
+
 ## Issues with IAerospikeClient
 Currently, Aerospike provides for `IAerospikeClient` (in Java) with sole intention of making AerospikeClient testable.
 However, there are few issues pointed out - https://github.com/aerospike/aerospike-client-java/issues/34

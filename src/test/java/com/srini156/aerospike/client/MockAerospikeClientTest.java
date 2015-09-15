@@ -1,6 +1,8 @@
 package com.srini156.aerospike.client;
 
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import org.srini156.aerospike.client.MockAerospikeClient;
@@ -37,5 +39,18 @@ public class MockAerospikeClientTest {
 	@Test(dependsOnMethods = "shouldGetRecord")
 	public void shouldDeleteRecord() {
 		assertTrue(mockAerospikeClient.delete(null, key));
+	}
+
+	@Test(dependsOnMethods = "shouldDeleteRecord")
+	public void shouldNotGetRecord() {
+		Record record = mockAerospikeClient.get(null, key);
+		assertNull(record);
+	}
+
+	@Test
+	public void shouldNotDeleteNonExistingRecord() {
+		Key nonExistingKey = new Key(namespace, set, "Non-key");
+		assertFalse(mockAerospikeClient.delete(null, nonExistingKey));
+
 	}
 }

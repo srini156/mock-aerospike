@@ -1,0 +1,8 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="MockAerospike" verbose="1">
+	<test name="MockAerospike">
+		<classes>
+			<class name="com.srini156.aerospike.client.MockAerospikeClientTest" />
+		</classes>
+	</test>
+</suite>

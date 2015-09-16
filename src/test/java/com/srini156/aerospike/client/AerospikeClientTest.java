@@ -2,10 +2,16 @@ package com.srini156.aerospike.client;
 
 import com.aerospike.client.AerospikeClient;
 
-public class AerospikeClientTest extends BaseAerospikeTest {
+/**
+ * Running the BaseTests on actual aerospike box to verify the implementation of MockAerospike.
+ * 
+ * @author srinivas.iyengar
+ *
+ */
+public class AerospikeClientTest extends BaseAerospikeClientTest {
 
 	/**
-	 * Running the BaseTests on actual aerospike box to verify the implementation of MockAerospike.
+	 * Default Constructor.
 	 */
 	public AerospikeClientTest() {
 

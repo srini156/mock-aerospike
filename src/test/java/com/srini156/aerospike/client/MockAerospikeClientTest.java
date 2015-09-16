@@ -9,7 +9,7 @@ import org.srini156.aerospike.client.MockAerospikeClient;
  * @author srinivas.iyengar
  *
  */
-public class MockAerospikeClientTest extends BaseAerospikeTest {
+public class MockAerospikeClientTest extends BaseAerospikeClientTest {
 
 	/**
 	 * Default Constructor.

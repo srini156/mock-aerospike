@@ -13,7 +13,7 @@ import com.aerospike.client.IAerospikeClient;
 import com.aerospike.client.Key;
 import com.aerospike.client.Record;
 
-public abstract class BaseAerospikeTest {
+public abstract class BaseAerospikeClientTest {
 
 	protected IAerospikeClient aerospikeClient;
 	protected String namespace = "test";
@@ -21,7 +21,7 @@ public abstract class BaseAerospikeTest {
 	protected Key key = new Key(namespace, set, "Key");
 	protected Bin[] bins = new Bin[] { new Bin("first", "first"), new Bin("second", 123L) };
 
-	public BaseAerospikeTest(IAerospikeClient client) {
+	public BaseAerospikeClientTest(IAerospikeClient client) {
 		this.aerospikeClient = client;
 	}
 
@@ -36,7 +36,9 @@ public abstract class BaseAerospikeTest {
 		assertNotNull(record);
 		assertEquals(record.bins.size(), 2);
 		assertTrue(record.bins.containsKey("first"));
+		assertEquals(record.bins.get("first"), "first");
 		assertTrue(record.bins.containsKey("second"));
+		assertEquals(record.bins.get("second"), 123L);
 	}
 
 	@Test(dependsOnMethods = "shouldGetRecord")

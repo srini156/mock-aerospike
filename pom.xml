@@ -5,7 +5,20 @@
 	<artifactId>mock-aerospike-java</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Mock Aerospike Java Client</name>
-	<description>Mock Aerospike Java Client</description>
+	<description>Mock Aerospike Java Client - Allows for mocking &amp; unit testing</description>
+	<developers>
+		<developer>
+			<id>srini156</id>
+			<name>Srinivas Iyengar</name>
+		</developer>
+	</developers>
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
 	<dependencies>
 		<dependency>
 			<groupId>com.aerospike</groupId>
@@ -22,12 +35,11 @@
 			<artifactId>testng</artifactId>
 			<version>${testng.version}</version>
 		</dependency>
-
-
 	</dependencies>
 	<properties>
 		<aerospike.version>3.0.34</aerospike.version>
 		<guava.version>18.0</guava.version>
 		<testng.version>6.9.6</testng.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 </project>

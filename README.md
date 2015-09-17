@@ -15,7 +15,7 @@ Currently, `MockAerospikeClient` supports the following methods:
 - delete
 - exists
 
-`MockAerospikeClient` internally uses a `HashMap` to store `Bin[]` corresponding to a `Key`
+`MockAerospikeClient` internally uses a `HashMap` to store `Record` corresponding to a `Key`
 
 ## Setup
 - Maven

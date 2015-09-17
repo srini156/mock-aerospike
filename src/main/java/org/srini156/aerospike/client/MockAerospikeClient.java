@@ -3,7 +3,6 @@ package org.srini156.aerospike.client;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.aerospike.client.AerospikeException;
 import com.aerospike.client.AerospikeException.InvalidNode;
@@ -38,7 +37,6 @@ import com.aerospike.client.task.ExecuteTask;
 import com.aerospike.client.task.IndexTask;
 import com.aerospike.client.task.RegisterTask;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 /**
  * Mock Implementation of IAerospikeClient for allowing unit testing.
@@ -48,7 +46,7 @@ import com.google.common.collect.Sets;
  */
 public class MockAerospikeClient implements IAerospikeClient {
 
-	private final Map<Key, Bin[]> data = Maps.newHashMap();
+	private final Map<Key, Record> data = Maps.newHashMap();
 
 	public void close() {
 		data.clear();
@@ -80,7 +78,7 @@ public class MockAerospikeClient implements IAerospikeClient {
 	 * @throws AerospikeException if write fails
 	 */
 	public void put(WritePolicy policy, Key key, Bin... bins) throws AerospikeException {
-		data.put(key, bins);
+		data.put(key, new Record(convertToMap(bins), 0, 0));
 	}
 
 	public void append(WritePolicy policy, Key key, Bin... bins) throws AerospikeException {
@@ -129,35 +127,31 @@ public class MockAerospikeClient implements IAerospikeClient {
 	}
 
 	public Record get(Policy policy, Key key) throws AerospikeException {
-
-		if (exists(policy, key)) {
-			final Map<String, Object> bins = new HashMap<String, Object>(data.get(key).length);
-			for (Bin bin : data.get(key)) {
-				bins.put(bin.name, bin.value.getObject());
-			}
-			return new Record(bins, 0, 0);
-		}
-		return null;
+		return data.get(key);
 	}
 
 	public Record get(Policy policy, Key key, String... binNames) throws AerospikeException {
-
-		Set<String> binSet = Sets.newHashSet(binNames);
-
-		if (exists(policy, key)) {
-			final Map<String, Object> bins = new HashMap<String, Object>(data.get(key).length);
-			for (Bin bin : data.get(key)) {
-				if (binSet.contains(bin.name)) {
-					bins.put(bin.name, bin.value.getObject());
-				}
+		Record record = data.get(key);
+		if (record == null) {
+			return null;
+		} else {
+			// filter bins.
+			Map<String, Object> filteredBins = Maps.newHashMap();
+			for (String bin : binNames) {
+				filteredBins.put(bin, record.bins.get(bin));
 			}
-			return new Record(bins, 0, 0);
+			return new Record(filteredBins, record.generation, record.expiration);
 		}
-		return null;
 	}
 
 	public Record getHeader(Policy policy, Key key) throws AerospikeException {
-		throw new UnsupportedOperationException("getHeader is not supported in MockAerospike");
+		Record record = data.get(key);
+
+		if (record == null) {
+			return null;
+		} else {
+			return new Record(null, record.generation, record.expiration);
+		}
 
 	}
 
@@ -358,4 +352,15 @@ public class MockAerospikeClient implements IAerospikeClient {
 		throw new UnsupportedOperationException("queryRoles is not supported in MockAerospike");
 	}
 
+	/**
+	 * @param bins
+	 * @return
+	 */
+	private Map<String, Object> convertToMap(Bin[] bins) {
+		Map<String, Object> binMap = new HashMap<String, Object>(bins.length);
+		for (Bin bin : bins) {
+			binMap.put(bin.name, bin.value.getObject());
+		}
+		return binMap;
+	}
 }

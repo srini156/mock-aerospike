@@ -42,6 +42,13 @@ public abstract class BaseAerospikeClientTest {
 	}
 
 	@Test(dependsOnMethods = "shouldGetRecord")
+	public void shouldGetHeader() {
+		Record record = aerospikeClient.getHeader(null, key);
+		assertNotNull(record);
+		assertNull(record.bins);
+	}
+
+	@Test(dependsOnMethods = "shouldGetHeader")
 	public void shouldDeleteRecord() {
 		assertTrue(aerospikeClient.delete(null, key));
 	}

@@ -180,12 +180,15 @@ public class MockAerospikeClient implements IAerospikeClient {
 	}
 
 	public Record[] getHeader(Policy policy, Key[] keys) throws AerospikeException {
-		throw new UnsupportedOperationException("getHeader is not supported in MockAerospike");
-
+		Record[] records = new Record[keys.length];
+		for (int idx = 0; idx < records.length; idx++) {
+			records[idx] = getHeader(policy, keys[idx]);
+		}
+		return records;
 	}
 
 	public Record[] getHeader(BatchPolicy policy, Key[] keys) throws AerospikeException {
-		throw new UnsupportedOperationException("getHeader is not supported in MockAerospike");
+		return getHeader((Policy) policy, keys);
 	}
 
 	public Record operate(WritePolicy policy, Key key, Operation... operations) throws AerospikeException {

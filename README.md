@@ -14,6 +14,7 @@ Currently, `MockAerospikeClient` supports the following methods:
 - get
 - delete
 - exists
+- getHeader
 
 `MockAerospikeClient` internally uses a `HashMap` to store `Record` corresponding to a `Key`
 

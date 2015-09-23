@@ -1,4 +1,4 @@
-package com.srini156.aerospike.client;
+package com.github.srini156.aerospike.client;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;

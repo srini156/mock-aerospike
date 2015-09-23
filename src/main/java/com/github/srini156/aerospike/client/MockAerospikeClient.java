@@ -1,4 +1,4 @@
-package org.srini156.aerospike.client;
+package com.github.srini156.aerospike.client;
 
 import java.util.HashMap;
 import java.util.List;

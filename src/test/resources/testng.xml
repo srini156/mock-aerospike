@@ -2,7 +2,7 @@
 <suite name="MockAerospike" verbose="1">
 	<test name="MockAerospike">
 		<classes>
-			<class name="com.srini156.aerospike.client.MockAerospikeClientTest" />
+			<class name="com.github.srini156.aerospike.client.MockAerospikeClientTest" />
 		</classes>
 	</test>
 </suite>

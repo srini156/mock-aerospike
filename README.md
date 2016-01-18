@@ -20,7 +20,7 @@ Currently, `MockAerospikeClient` supports the following methods:
 
 ## Setup
 - Maven
-- Java 1.7 or greater
+- Java 1.8 or greater
 
 ## Contributions
 It is currently alpha and WIP. Contributions are welcome, please raise a pull request.

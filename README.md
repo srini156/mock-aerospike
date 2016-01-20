@@ -15,6 +15,7 @@ However, there are few issues pointed out - https://github.com/aerospike/aerospi
 Better approach to testing is to create `MockAerospikeClient` which implements `IAerospikeClient`, thus avoiding mocking `RecordSet` and `Record` itself.
 
 ## Implementation
+`MockAerospikeClient` implements `IAerospikeClient` (version - `3.0.34`)  
 Currently, `MockAerospikeClient` supports the following methods:
 - put
 - get
@@ -29,8 +30,8 @@ Currently, `MockAerospikeClient` supports the following methods:
 - Java 1.8 or greater
 
 ## Usage
-- pom.xml
-Added the following dependency to your pom.xml
+- pom.xml  
+Add the following dependency to your pom.xml
 ```
 <dependency>
   <groupId>com.github.srini156</groupId>

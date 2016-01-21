@@ -41,7 +41,6 @@ import com.aerospike.client.task.RegisterTask;
 /**
  * Mock Implementation of IAerospikeClient to allow cleaner unit testing.
  * 
- *
  * @author srinivas.iyengar
  */
 public class MockAerospikeClient implements IAerospikeClient {

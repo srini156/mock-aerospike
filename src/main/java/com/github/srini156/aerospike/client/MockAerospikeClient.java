@@ -37,6 +37,7 @@ import com.aerospike.client.query.Statement;
 import com.aerospike.client.task.ExecuteTask;
 import com.aerospike.client.task.IndexTask;
 import com.aerospike.client.task.RegisterTask;
+import com.google.common.collect.Lists;
 
 /**
  * Mock Implementation of IAerospikeClient to allow cleaner unit testing.
@@ -72,7 +73,7 @@ public class MockAerospikeClient implements IAerospikeClient {
 	 * @return array of active nodes
 	 */
 	public Node[] getNodes() {
-		return null;
+		return new Node[] {};
 	}
 
 	/**
@@ -81,7 +82,7 @@ public class MockAerospikeClient implements IAerospikeClient {
 	 * @return list of active node names
 	 */
 	public List<String> getNodeNames() {
-		return null;
+		return Lists.newLinkedList();
 	}
 
 	/**

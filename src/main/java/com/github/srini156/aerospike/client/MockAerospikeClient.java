@@ -131,6 +131,12 @@ public class MockAerospikeClient implements IAerospikeClient {
 	 */
 	public void append(WritePolicy policy, Key key, Bin... bins)
 			throws AerospikeException {
+		// If Key is not present, create a new record.
+		// If Bin is present but not a string, throw
+		// com.aerospike.client.AerospikeException: Error Code 12: Bin type
+		// error
+		// else, append the string.
+
 		throw new UnsupportedOperationException(
 				"append is not supported in MockAerospike");
 

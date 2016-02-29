@@ -137,7 +137,7 @@
 		</plugins>
 	</build>
 	<properties>
-		<aerospike.version>3.0.34</aerospike.version>
+		<aerospike.version>3.1.8</aerospike.version>
         <testng.version>6.9.6</testng.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jdk.version>1.8</jdk.version>

@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.aerospike.client.AerospikeException;
 import com.aerospike.client.AerospikeException.InvalidNode;
+import com.aerospike.client.BatchRead;
 import com.aerospike.client.Bin;
 import com.aerospike.client.IAerospikeClient;
 import com.aerospike.client.Key;
@@ -15,6 +16,7 @@ import com.aerospike.client.Operation;
 import com.aerospike.client.Record;
 import com.aerospike.client.ScanCallback;
 import com.aerospike.client.Value;
+import com.aerospike.client.Value.BooleanValue;
 import com.aerospike.client.admin.Privilege;
 import com.aerospike.client.admin.Role;
 import com.aerospike.client.admin.User;
@@ -25,6 +27,7 @@ import com.aerospike.client.large.LargeSet;
 import com.aerospike.client.large.LargeStack;
 import com.aerospike.client.policy.AdminPolicy;
 import com.aerospike.client.policy.BatchPolicy;
+import com.aerospike.client.policy.InfoPolicy;
 import com.aerospike.client.policy.Policy;
 import com.aerospike.client.policy.QueryPolicy;
 import com.aerospike.client.policy.ScanPolicy;
@@ -1338,8 +1341,83 @@ public class MockAerospikeClient implements IAerospikeClient {
 	private Map<String, Object> convertToMap(Bin[] bins) {
 		Map<String, Object> binMap = new HashMap<String, Object>(bins.length);
 		for (Bin bin : bins) {
-			binMap.put(bin.name, bin.value.getObject());
+			if (bin.value instanceof BooleanValue) {
+				binMap.put(bin.name, bin.value.toLong());
+			} else {
+				binMap.put(bin.name, bin.value.getObject());
+			}
 		}
 		return binMap;
+	}
+
+	@Override
+	public Policy getReadPolicyDefault() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public WritePolicy getWritePolicyDefault() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ScanPolicy getScanPolicyDefault() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public QueryPolicy getQueryPolicyDefault() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public BatchPolicy getBatchPolicyDefault() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public InfoPolicy getInfoPolicyDefault() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void get(BatchPolicy policy, List<BatchRead> records)
+			throws AerospikeException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public LargeList getLargeList(WritePolicy policy, Key key, String binName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public RegisterTask register(Policy policy, ClassLoader resourceLoader,
+			String resourcePath, String serverPath, Language language)
+			throws AerospikeException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void removeUdf(InfoPolicy policy, String serverPath)
+			throws AerospikeException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public ResultSet queryAggregate(QueryPolicy policy, Statement statement)
+			throws AerospikeException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

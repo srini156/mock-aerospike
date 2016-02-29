@@ -59,7 +59,7 @@ public class MockAerospikeClient implements IAerospikeClient {
 	}
 
 	/**
-	 * Determine if we are ready to talk to the database server cluster. <br/>
+	 * Determine if we are ready to talk to the database server cluster. <br>
 	 * Note: Mock always returns true.
 	 * 
 	 * @return <code>true</code> if cluster is ready, <code>false</code> if
@@ -70,7 +70,7 @@ public class MockAerospikeClient implements IAerospikeClient {
 	}
 
 	/**
-	 * Return array of active server nodes in the cluster. <br/>
+	 * Return array of active server nodes in the cluster. <br>
 	 * Always returns null - not implemented.
 	 * 
 	 * @return array of active nodes
@@ -827,7 +827,7 @@ public class MockAerospikeClient implements IAerospikeClient {
 	 * operates on a single record. The package name is used to locate the udf
 	 * file location:
 	 * <p>
-	 * udf file = <server udf dir>/<package name>.lua
+	 * udf file = {server udf dir}/${package name}.lua
 	 * <p>
 	 * This method is only supported by Aerospike 3 servers.
 	 * 
@@ -859,7 +859,7 @@ public class MockAerospikeClient implements IAerospikeClient {
 	 * operates on a single record. The package name is used to locate the udf
 	 * file location:
 	 * <p>
-	 * udf file = <server udf dir>/<package name>.lua
+	 * udf file = ${server udf dir}/${package name}.lua
 	 * <p>
 	 * This method is only supported by Aerospike 3 servers.
 	 * 
@@ -994,10 +994,11 @@ public class MockAerospikeClient implements IAerospikeClient {
 	 * The aggregation function is called on both server and client (final
 	 * reduce). Therefore, the Lua script files must also reside on both server
 	 * and client. The package name is used to locate the udf file location:
-	 * <p>
-	 * udf file = <udf dir>/<package name>.lua
+	 * </p>
+	 * udf file = ${udf dir}/${package name}.lua
 	 * <p>
 	 * This method is only supported by Aerospike 3 servers.
+	 * </p>
 	 * 
 	 * @param policy
 	 *            generic configuration parameters, pass in null for defaults

@@ -1429,7 +1429,6 @@ public class MockAerospikeClient implements IAerospikeClient {
 	public void removeUdf(InfoPolicy policy, String serverPath)
 			throws AerospikeException {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override

@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.github.srini156</groupId>
 	<artifactId>mock-aerospike-java</artifactId>
-	<version>0.0.5-SNAPSHOT</version>
+	<version>0.0.5</version>
 	<name>Mock Aerospike Java Client</name>
 	<url>https://github.com/srini156/mock-aersopike</url>
 	<description>Mock Aerospike Java Client - Allows for mocking &amp; unit testing</description>
@@ -128,7 +128,7 @@
 				<executions>
 					<execution>
 						<id>sign-artifacts</id>
-						<phase>deploy</phase>
+						<phase>verify</phase>
 						<goals>
 							<goal>sign</goal>
 						</goals>

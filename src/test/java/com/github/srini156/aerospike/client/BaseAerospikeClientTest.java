@@ -1,9 +1,6 @@
 package com.github.srini156.aerospike.client;
 
-import com.aerospike.client.Bin;
-import com.aerospike.client.IAerospikeClient;
-import com.aerospike.client.Key;
-import com.aerospike.client.Record;
+import com.aerospike.client.*;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -31,11 +28,20 @@ public abstract class BaseAerospikeClientTest {
 		aerospikeClient.put(null, key1, bins1);
 	}
 
+    @Test
+	public void shouldOperateRecord() {
+		Record record = aerospikeClient.operate(
+                null,key1, Operation.put(new Bin("test1", "test")), Operation.put(new Bin("test2", "test"))
+        );
+        assertTrue(record.bins.containsKey("test1"));
+        assertTrue(record.bins.containsKey("test2"));
+	}
+
 	@Test(dependsOnMethods = "shouldPutRecord")
 	public void shouldGetRecord() {
 		Record record = aerospikeClient.get(null, key1);
 		assertNotNull(record);
-		assertEquals(record.bins.size(), 3);
+		assertEquals(record.bins.size(), 5);
 		assertTrue(record.bins.containsKey("first"));
 		assertEquals(record.bins.get("first"), "first-1");
 		assertTrue(record.bins.containsKey("second"));

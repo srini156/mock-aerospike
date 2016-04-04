@@ -1,5 +1,6 @@
 package com.github.srini156.aerospike.client;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -512,8 +513,24 @@ public class MockAerospikeClient implements IAerospikeClient {
 	 */
 	public Record operate(WritePolicy policy, Key key, Operation... operations)
 			throws AerospikeException {
-		throw new UnsupportedOperationException(
-				"operate is not supported in MockAerospike");
+        Map<String, Object> bins = new HashMap<>();
+        //Add everything
+		for(Operation operation : operations) {
+            switch(operation.type) {
+                case ADD:
+                case APPEND:
+                case WRITE:
+                case PREPEND:
+                    bins.put(operation.binName, operation.value.getObject());
+            }
+        }
+
+        if(data.containsKey(key)) {
+            data.get(key).bins.putAll(bins);
+        } else {
+            data.put(key, new Record(bins, 0, 0));
+        }
+        return data.get(key);
 	}
 
 	/**

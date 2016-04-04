@@ -1,5 +1,6 @@
 package com.github.srini156.aerospike.client;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +60,7 @@ public class MockAerospikeClient implements IAerospikeClient {
 	}
 
 	/**
-	 * Determine if we are ready to talk to the database server cluster. <br/>
+	 * Determine if we are ready to talk to the database server cluster. <br>
 	 * Note: Mock always returns true.
 	 * 
 	 * @return <code>true</code> if cluster is ready, <code>false</code> if
@@ -70,7 +71,7 @@ public class MockAerospikeClient implements IAerospikeClient {
 	}
 
 	/**
-	 * Return array of active server nodes in the cluster. <br/>
+	 * Return array of active server nodes in the cluster. <br>
 	 * Always returns null - not implemented.
 	 * 
 	 * @return array of active nodes
@@ -512,8 +513,24 @@ public class MockAerospikeClient implements IAerospikeClient {
 	 */
 	public Record operate(WritePolicy policy, Key key, Operation... operations)
 			throws AerospikeException {
-		throw new UnsupportedOperationException(
-				"operate is not supported in MockAerospike");
+        Map<String, Object> bins = new HashMap<>();
+        //Add everything
+		for(Operation operation : operations) {
+            switch(operation.type) {
+                case ADD:
+                case APPEND:
+                case WRITE:
+                case PREPEND:
+                    bins.put(operation.binName, operation.value.getObject());
+            }
+        }
+
+        if(data.containsKey(key)) {
+            data.get(key).bins.putAll(bins);
+        } else {
+            data.put(key, new Record(bins, 0, 0));
+        }
+        return data.get(key);
 	}
 
 	/**
@@ -827,7 +844,7 @@ public class MockAerospikeClient implements IAerospikeClient {
 	 * operates on a single record. The package name is used to locate the udf
 	 * file location:
 	 * <p>
-	 * udf file = <server udf dir>/<package name>.lua
+	 * udf file = {server udf dir}/${package name}.lua
 	 * <p>
 	 * This method is only supported by Aerospike 3 servers.
 	 * 
@@ -859,7 +876,7 @@ public class MockAerospikeClient implements IAerospikeClient {
 	 * operates on a single record. The package name is used to locate the udf
 	 * file location:
 	 * <p>
-	 * udf file = <server udf dir>/<package name>.lua
+	 * udf file = ${server udf dir}/${package name}.lua
 	 * <p>
 	 * This method is only supported by Aerospike 3 servers.
 	 * 
@@ -994,10 +1011,11 @@ public class MockAerospikeClient implements IAerospikeClient {
 	 * The aggregation function is called on both server and client (final
 	 * reduce). Therefore, the Lua script files must also reside on both server
 	 * and client. The package name is used to locate the udf file location:
-	 * <p>
-	 * udf file = <udf dir>/<package name>.lua
+	 * </p>
+	 * udf file = ${udf dir}/${package name}.lua
 	 * <p>
 	 * This method is only supported by Aerospike 3 servers.
+	 * </p>
 	 * 
 	 * @param policy
 	 *            generic configuration parameters, pass in null for defaults
@@ -1411,7 +1429,6 @@ public class MockAerospikeClient implements IAerospikeClient {
 	public void removeUdf(InfoPolicy policy, String serverPath)
 			throws AerospikeException {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override

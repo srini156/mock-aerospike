@@ -1,6 +1,7 @@
 package com.github.srini156.aerospike.client;
 
 import com.aerospike.client.*;
+import com.aerospike.client.policy.WritePolicy;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -16,9 +17,11 @@ public abstract class BaseAerospikeClientTest {
 	protected Key key2 = new Key(namespace, set, "Key2");
 	protected Bin[] bins2 = new Bin[] { new Bin("first", "first-2"),
 			new Bin("second", 124L), new Bin("third", "third-2") };
+	protected Bin[] bins4 = new Bin[] { new Bin("first", "val"), new Bin("second", 1.0),
+										new Bin("third", 1)};
 	protected Key nonExistingKey = new Key(namespace, set, "Non-key");
 	protected Key key3 = new Key(namespace, set, "Key3");
-
+	protected Key key4 = new Key(namespace, set, "Temp Key");
 	public BaseAerospikeClientTest(IAerospikeClient client) {
 		this.aerospikeClient = client;
 	}
@@ -171,6 +174,83 @@ public abstract class BaseAerospikeClientTest {
 	@Test
 	public void shouldNotGetNonExistingHeader() {
 		assertNull(aerospikeClient.getHeader(null, nonExistingKey));
+	}
+
+	@Test(dependsOnMethods = "shouldGetRecord")
+	public void shouldTouchRecord() {
+		WritePolicy writePolicy = new WritePolicy();
+		writePolicy.expiration = 1000;
+		int expiration = aerospikeClient.get(null, key1).expiration;
+		aerospikeClient.touch(writePolicy, key1);
+		int new_expiration = aerospikeClient.get(null, key1).expiration;
+		assertFalse(expiration == new_expiration);
+	}
+
+	@Test(dependsOnMethods = "shouldNotGetRecord")
+	public void shouldThrowOnTouchRecord() {
+		assertThrows(AerospikeException.class, () -> {
+			WritePolicy writePolicy = new WritePolicy();
+			writePolicy.expiration = 1000;
+			aerospikeClient.touch(writePolicy, nonExistingKey);
+		});
+	}
+
+	@Test
+	public void putTempKey() {
+		aerospikeClient.put(null, key4, bins4);
+	}
+
+	@Test(dependsOnMethods = "putTempKey")
+	public void shouldGetTempKey() {
+		assertTrue(aerospikeClient.exists(null, key4));
+	}
+
+	@Test(dependsOnMethods = {"shouldGetTempKey"})
+	public void shouldAppendIfRecordExists() {
+		assertEquals(aerospikeClient.get(null, key4).bins.get("first"), "val");
+		aerospikeClient.append(null, key4, new Bin("first", "ue"));
+		assertEquals(aerospikeClient.get(null, key4).bins.get("first"), "value");
+
+		// Undo changes
+		aerospikeClient.get(null, key4).bins.put("first", "val");
+	}
+
+	@Test(dependsOnMethods="shouldGetTempKey")
+	public void shouldThrowOnNonStringAppendRecord() {
+		assertThrows(AerospikeException.class, () -> {
+			aerospikeClient.append(null, key4, new Bin("second", 2));
+		});
+	}
+
+	@Test(dependsOnMethods = "shouldGetTempKey")
+	public void shouldAddRecord() {
+		aerospikeClient.put(null, key4, new Bin("third", 1));
+		Record record = aerospikeClient.get(null, key4);
+		assertNotNull(record);
+		assertTrue(record.bins.containsKey("third"));
+		assertEquals(record.bins.get("third"), 1);
+		aerospikeClient.add(null, key4, new Bin("third", 1));
+		assertEquals(aerospikeClient.get(null, key4).bins.get("third"), 2);
+
+		// Undo changes
+		aerospikeClient.get(null, key4).bins.put("third", 1);
+	}
+
+	@Test
+	public void shouldThrowOnNonIntAddRecord() {
+		assertThrows(AerospikeException.class, () -> {
+			aerospikeClient.add(null, key4, new Bin("second", 1));
+		});
+	}
+
+	@Test(dependsOnMethods = "shouldGetTempKey")
+	public void shouldAppendIfRecordDoesNotExist() {
+		aerospikeClient.delete(null, key4);
+		Record record = aerospikeClient.get(null, key4);
+		assertNull(record);
+		aerospikeClient.append(null, key4, new Bin("first", "val"));
+		assertEquals(aerospikeClient.get(null, key4).bins.get("first"), "val");
+		putTempKey();
 	}
 
 }

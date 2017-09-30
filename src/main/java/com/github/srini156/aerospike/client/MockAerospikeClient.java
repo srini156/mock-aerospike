@@ -1,6 +1,5 @@
 package com.github.srini156.aerospike.client;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -140,10 +139,18 @@ public class MockAerospikeClient implements IAerospikeClient {
 		// com.aerospike.client.AerospikeException: Error Code 12: Bin type
 		// error
 		// else, append the string.
-
-		throw new UnsupportedOperationException(
-				"append is not supported in MockAerospike");
-
+		if (!data.containsKey(key))
+			put(policy, key, bins);
+		else {
+			Map<String, Object> recordBins = data.get(key).bins;
+			for(Bin bin:bins)
+				recordBins.computeIfPresent(bin.name, (s, o) -> {
+					if (o instanceof String)
+						return o.toString() + bin.value.toString();
+					else
+						throw new AerospikeException("Error Code 12: Bin type");
+				});
+		}
 	}
 
 	/**
@@ -163,9 +170,18 @@ public class MockAerospikeClient implements IAerospikeClient {
 	 */
 	public void prepend(WritePolicy policy, Key key, Bin... bins)
 			throws AerospikeException {
-		throw new UnsupportedOperationException(
-				"prepend is not supported in MockAerospike");
-
+		if (!data.containsKey(key))
+			put(policy, key, bins);
+		else {
+			Map<String, Object> recordBins = data.get(key).bins;
+			for(Bin bin:bins)
+				recordBins.computeIfPresent(bin.name, (s, o) -> {
+					if (o instanceof String)
+						return bin.value.toString() + o;
+					else
+						throw new AerospikeException("Error Code 12: Bin type");
+				});
+		}
 	}
 
 	/**
@@ -185,9 +201,18 @@ public class MockAerospikeClient implements IAerospikeClient {
 	 */
 	public void add(WritePolicy policy, Key key, Bin... bins)
 			throws AerospikeException {
-		throw new UnsupportedOperationException(
-				"add is not supported in MockAerospike");
-
+		if (!data.containsKey(key))
+			put(policy, key, bins);
+		else {
+			Map<String, Object> recordBins = data.get(key).bins;
+			for(Bin bin:bins)
+				recordBins.computeIfPresent(bin.name, (s, o) -> {
+					if (o instanceof Integer)
+						return bin.value.toInteger() + ((Integer) o);
+					else
+						throw new AerospikeException("Error Code 12: Bin type");
+				});
+		}
 	}
 
 	/**
@@ -224,9 +249,12 @@ public class MockAerospikeClient implements IAerospikeClient {
 	 *             if touch fails
 	 */
 	public void touch(WritePolicy policy, Key key) throws AerospikeException {
-		throw new UnsupportedOperationException(
-				"touch is not supported in MockAerospike");
-
+		if (data.containsKey(key)) {
+			Record record = data.remove(key);
+			data.put(key, new Record(record.bins, record.generation, policy.expiration));
+		} else {
+			throw new AerospikeException("Error Code 2: Key not found");
+		}
 	}
 
 	/**

@@ -1,6 +1,7 @@
 package com.github.srini156.aerospike.client;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,11 +22,23 @@ import com.aerospike.client.Value.BooleanValue;
 import com.aerospike.client.admin.Privilege;
 import com.aerospike.client.admin.Role;
 import com.aerospike.client.admin.User;
+import com.aerospike.client.async.EventLoop;
 import com.aerospike.client.cluster.Node;
 import com.aerospike.client.large.LargeList;
 import com.aerospike.client.large.LargeMap;
 import com.aerospike.client.large.LargeSet;
 import com.aerospike.client.large.LargeStack;
+import com.aerospike.client.listener.BatchListListener;
+import com.aerospike.client.listener.BatchSequenceListener;
+import com.aerospike.client.listener.DeleteListener;
+import com.aerospike.client.listener.ExecuteListener;
+import com.aerospike.client.listener.ExistsArrayListener;
+import com.aerospike.client.listener.ExistsListener;
+import com.aerospike.client.listener.ExistsSequenceListener;
+import com.aerospike.client.listener.RecordArrayListener;
+import com.aerospike.client.listener.RecordListener;
+import com.aerospike.client.listener.RecordSequenceListener;
+import com.aerospike.client.listener.WriteListener;
 import com.aerospike.client.policy.AdminPolicy;
 import com.aerospike.client.policy.BatchPolicy;
 import com.aerospike.client.policy.InfoPolicy;
@@ -1436,5 +1449,186 @@ public class MockAerospikeClient implements IAerospikeClient {
 			throws AerospikeException {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void add(EventLoop arg0, WriteListener arg1, WritePolicy arg2, Key arg3, Bin... arg4)
+			throws AerospikeException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void append(EventLoop arg0, WriteListener arg1, WritePolicy arg2, Key arg3, Bin... arg4)
+			throws AerospikeException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void delete(EventLoop arg0, DeleteListener arg1, WritePolicy arg2, Key arg3) throws AerospikeException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void execute(EventLoop arg0, ExecuteListener arg1, WritePolicy arg2, Key arg3, String arg4, String arg5,
+			Value... arg6) throws AerospikeException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void exists(EventLoop arg0, ExistsListener arg1, Policy arg2, Key arg3) throws AerospikeException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void exists(EventLoop arg0, ExistsArrayListener arg1, BatchPolicy arg2, Key[] arg3)
+			throws AerospikeException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void exists(EventLoop arg0, ExistsSequenceListener arg1, BatchPolicy arg2, Key[] arg3)
+			throws AerospikeException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void get(EventLoop arg0, RecordListener arg1, Policy arg2, Key arg3) throws AerospikeException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void get(EventLoop arg0, BatchListListener arg1, BatchPolicy arg2, List<BatchRead> arg3)
+			throws AerospikeException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void get(EventLoop arg0, BatchSequenceListener arg1, BatchPolicy arg2, List<BatchRead> arg3)
+			throws AerospikeException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void get(EventLoop arg0, RecordArrayListener arg1, BatchPolicy arg2, Key[] arg3) throws AerospikeException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void get(EventLoop arg0, RecordSequenceListener arg1, BatchPolicy arg2, Key[] arg3)
+			throws AerospikeException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void get(EventLoop arg0, RecordListener arg1, Policy arg2, Key arg3, String... arg4)
+			throws AerospikeException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void get(EventLoop arg0, RecordArrayListener arg1, BatchPolicy arg2, Key[] arg3, String... arg4)
+			throws AerospikeException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void get(EventLoop arg0, RecordSequenceListener arg1, BatchPolicy arg2, Key[] arg3, String... arg4)
+			throws AerospikeException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void getHeader(EventLoop arg0, RecordListener arg1, Policy arg2, Key arg3) throws AerospikeException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void getHeader(EventLoop arg0, RecordArrayListener arg1, BatchPolicy arg2, Key[] arg3)
+			throws AerospikeException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void getHeader(EventLoop arg0, RecordSequenceListener arg1, BatchPolicy arg2, Key[] arg3)
+			throws AerospikeException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void operate(EventLoop arg0, RecordListener arg1, WritePolicy arg2, Key arg3, Operation... arg4)
+			throws AerospikeException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void prepend(EventLoop arg0, WriteListener arg1, WritePolicy arg2, Key arg3, Bin... arg4)
+			throws AerospikeException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void put(EventLoop arg0, WriteListener arg1, WritePolicy arg2, Key arg3, Bin... arg4)
+			throws AerospikeException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void query(EventLoop arg0, RecordSequenceListener arg1, QueryPolicy arg2, Statement arg3)
+			throws AerospikeException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public ResultSet queryAggregateNode(QueryPolicy arg0, Statement arg1, Node arg2) throws AerospikeException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public RegisterTask registerUdfString(Policy arg0, String arg1, String arg2, Language arg3)
+			throws AerospikeException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void scanAll(EventLoop arg0, RecordSequenceListener arg1, ScanPolicy arg2, String arg3, String arg4,
+			String... arg5) throws AerospikeException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void touch(EventLoop arg0, WriteListener arg1, WritePolicy arg2, Key arg3) throws AerospikeException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void truncate(InfoPolicy arg0, String arg1, String arg2, Calendar arg3) throws AerospikeException {
+		// TODO Auto-generated method stub
+		
 	}
 }

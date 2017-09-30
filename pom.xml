@@ -37,6 +37,11 @@
 	</distributionManagement>
 	<dependencies>
 		<dependency>
+			<groupId>com.google.collections</groupId>
+			<artifactId>google-collections</artifactId>
+			<version>${google-collections.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>com.aerospike</groupId>
 			<artifactId>aerospike-client</artifactId>
 			<version>${aerospike.version}</version>
@@ -138,8 +143,9 @@
 		</plugins>
 	</build>
 	<properties>
-		<aerospike.version>3.2.1</aerospike.version>
-		<testng.version>6.9.6</testng.version>
+		<google-collections.version>1.0</google-collections.version>
+		<aerospike.version>4.0.8</aerospike.version>
+		<testng.version>6.11</testng.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jdk.version>1.8</jdk.version>
 	</properties>

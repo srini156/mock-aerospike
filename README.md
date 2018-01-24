@@ -1,4 +1,4 @@
-# mock-aersopike
+# mock-aerospike
 Just use `MockAerospikeClient` implementation for the interface `IAerospikeClient` in your unit tests.
 
 ## Goals

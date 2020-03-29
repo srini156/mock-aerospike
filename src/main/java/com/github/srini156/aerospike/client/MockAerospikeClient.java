@@ -1,9 +1,11 @@
 package com.github.srini156.aerospike.client;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import com.aerospike.client.AerospikeException;
 import com.aerospike.client.AerospikeException.InvalidNode;
 import com.aerospike.client.BatchRead;
@@ -19,11 +21,10 @@ import com.aerospike.client.Value.BooleanValue;
 import com.aerospike.client.admin.Privilege;
 import com.aerospike.client.admin.Role;
 import com.aerospike.client.admin.User;
+import com.aerospike.client.async.EventLoop;
+import com.aerospike.client.cluster.ClusterStats;
 import com.aerospike.client.cluster.Node;
-import com.aerospike.client.large.LargeList;
-import com.aerospike.client.large.LargeMap;
-import com.aerospike.client.large.LargeSet;
-import com.aerospike.client.large.LargeStack;
+import com.aerospike.client.listener.*;
 import com.aerospike.client.policy.AdminPolicy;
 import com.aerospike.client.policy.BatchPolicy;
 import com.aerospike.client.policy.InfoPolicy;
@@ -31,11 +32,7 @@ import com.aerospike.client.policy.Policy;
 import com.aerospike.client.policy.QueryPolicy;
 import com.aerospike.client.policy.ScanPolicy;
 import com.aerospike.client.policy.WritePolicy;
-import com.aerospike.client.query.IndexCollectionType;
-import com.aerospike.client.query.IndexType;
-import com.aerospike.client.query.RecordSet;
-import com.aerospike.client.query.ResultSet;
-import com.aerospike.client.query.Statement;
+import com.aerospike.client.query.*;
 import com.aerospike.client.task.ExecuteTask;
 import com.aerospike.client.task.IndexTask;
 import com.aerospike.client.task.RegisterTask;
@@ -74,7 +71,7 @@ public class MockAerospikeClient implements IAerospikeClient {
      * @return array of active nodes
      */
     public Node[] getNodes() {
-        return new Node[] {};
+        return new Node[]{};
     }
 
     /**
@@ -92,7 +89,12 @@ public class MockAerospikeClient implements IAerospikeClient {
      * @throws AerospikeException.InvalidNode if node does not exist.
      */
     public Node getNode(String nodeName) throws InvalidNode {
-        throw new InvalidNode();
+        throw new InvalidNode("Node not available");
+    }
+
+    @Override
+    public ClusterStats getClusterStats() {
+        return null;
     }
 
     /**
@@ -101,12 +103,17 @@ public class MockAerospikeClient implements IAerospikeClient {
      * exists.
      *
      * @param policy write configuration parameters, pass in null for defaults
-     * @param key unique record identifier
-     * @param bins array of bin name/value pairs
+     * @param key    unique record identifier
+     * @param bins   array of bin name/value pairs
      * @throws AerospikeException if write fails
      */
     public void put(WritePolicy policy, Key key, Bin... bins) throws AerospikeException {
         data.put(key, new Record(convertToMap(bins), 0, 0));
+    }
+
+    @Override
+    public void put(EventLoop eventLoop, WriteListener writeListener, WritePolicy writePolicy, Key key, Bin... bins) throws AerospikeException {
+
     }
 
     /**
@@ -116,8 +123,8 @@ public class MockAerospikeClient implements IAerospikeClient {
      * works for string values.
      *
      * @param policy write configuration parameters, pass in null for defaults
-     * @param key unique record identifier
-     * @param bins array of bin name/value pairs
+     * @param key    unique record identifier
+     * @param bins   array of bin name/value pairs
      * @throws AerospikeException if append fails
      */
     public void append(WritePolicy policy, Key key, Bin... bins) throws AerospikeException {
@@ -142,6 +149,11 @@ public class MockAerospikeClient implements IAerospikeClient {
         }
     }
 
+    @Override
+    public void append(EventLoop eventLoop, WriteListener writeListener, WritePolicy writePolicy, Key key, Bin... bins) throws AerospikeException {
+
+    }
+
     /**
      * Prepend bin string values to existing record bin values. The policy
      * specifies the transaction timeout, record expiration and how the
@@ -149,8 +161,8 @@ public class MockAerospikeClient implements IAerospikeClient {
      * only for string values.
      *
      * @param policy write configuration parameters, pass in null for defaults
-     * @param key unique record identifier
-     * @param bins array of bin name/value pairs
+     * @param key    unique record identifier
+     * @param bins   array of bin name/value pairs
      * @throws AerospikeException if prepend fails
      */
     public void prepend(WritePolicy policy, Key key, Bin... bins) throws AerospikeException {
@@ -170,6 +182,11 @@ public class MockAerospikeClient implements IAerospikeClient {
         }
     }
 
+    @Override
+    public void prepend(EventLoop eventLoop, WriteListener writeListener, WritePolicy writePolicy, Key key, Bin... bins) throws AerospikeException {
+
+    }
+
     /**
      * Add integer bin values to existing record bin values. The policy
      * specifies the transaction timeout, record expiration and how the
@@ -177,8 +194,8 @@ public class MockAerospikeClient implements IAerospikeClient {
      * works for integer values.
      *
      * @param policy write configuration parameters, pass in null for defaults
-     * @param key unique record identifier
-     * @param bins array of bin name/value pairs
+     * @param key    unique record identifier
+     * @param bins   array of bin name/value pairs
      * @throws AerospikeException if add fails
      */
     public void add(WritePolicy policy, Key key, Bin... bins) throws AerospikeException {
@@ -190,6 +207,8 @@ public class MockAerospikeClient implements IAerospikeClient {
                 recordBins.computeIfPresent(bin.name, (s, o) -> {
                     if (o instanceof Integer) {
                         return bin.value.toInteger() + ((Integer) o);
+                    } else if (o instanceof Long) {
+                        return bin.value.toLong() + ((Long) o);
                     } else {
                         throw new AerospikeException("Error Code 12: Bin type");
                     }
@@ -198,12 +217,17 @@ public class MockAerospikeClient implements IAerospikeClient {
         }
     }
 
+    @Override
+    public void add(EventLoop eventLoop, WriteListener writeListener, WritePolicy writePolicy, Key key, Bin... bins) throws AerospikeException {
+
+    }
+
     /**
      * Delete record for specified key. The policy specifies the transaction
      * timeout.
      *
      * @param policy delete configuration parameters, pass in null for defaults
-     * @param key unique record identifier
+     * @param key    unique record identifier
      * @return whether record existed on server before deletion
      * @throws AerospikeException if delete fails
      */
@@ -216,12 +240,22 @@ public class MockAerospikeClient implements IAerospikeClient {
         }
     }
 
+    @Override
+    public void delete(EventLoop eventLoop, DeleteListener deleteListener, WritePolicy writePolicy, Key key) throws AerospikeException {
+
+    }
+
+    @Override
+    public void truncate(InfoPolicy infoPolicy, String s, String s1, Calendar calendar) throws AerospikeException {
+
+    }
+
     /**
      * Reset record's time to expiration using the policy's expiration. Fail if
      * the record does not exist.
      *
      * @param policy write configuration parameters, pass in null for defaults
-     * @param key unique record identifier
+     * @param key    unique record identifier
      * @throws AerospikeException if touch fails
      */
     public void touch(WritePolicy policy, Key key) throws AerospikeException {
@@ -233,17 +267,27 @@ public class MockAerospikeClient implements IAerospikeClient {
         }
     }
 
+    @Override
+    public void touch(EventLoop eventLoop, WriteListener writeListener, WritePolicy writePolicy, Key key) throws AerospikeException {
+
+    }
+
     /**
      * Determine if a record key exists. The policy can be used to specify
      * timeouts.
      *
      * @param policy generic configuration parameters, pass in null for defaults
-     * @param key unique record identifier
+     * @param key    unique record identifier
      * @return whether record exists or not
      * @throws AerospikeException if command fails
      */
     public boolean exists(Policy policy, Key key) throws AerospikeException {
         return data.containsKey(key);
+    }
+
+    @Override
+    public void exists(EventLoop eventLoop, ExistsListener existsListener, Policy policy, Key key) throws AerospikeException {
+
     }
 
     /**
@@ -252,7 +296,7 @@ public class MockAerospikeClient implements IAerospikeClient {
      * The policy can be used to specify timeouts.
      *
      * @param policy generic configuration parameters, pass in null for defaults
-     * @param keys array of unique record identifiers
+     * @param keys   array of unique record identifiers
      * @return array key/existence status pairs
      * @throws AerospikeException if command fails
      * @deprecated Use {@link #exists(BatchPolicy, Key[])} instead.
@@ -273,7 +317,7 @@ public class MockAerospikeClient implements IAerospikeClient {
      * threads.
      *
      * @param policy batch configuration parameters, pass in null for defaults
-     * @param keys array of unique record identifiers
+     * @param keys   array of unique record identifiers
      * @return array key/existence status pairs
      * @throws AerospikeException if command fails
      */
@@ -281,12 +325,22 @@ public class MockAerospikeClient implements IAerospikeClient {
         return exists((Policy) policy, keys);
     }
 
+    @Override
+    public void exists(EventLoop eventLoop, ExistsArrayListener existsArrayListener, BatchPolicy batchPolicy, Key[] keys) throws AerospikeException {
+
+    }
+
+    @Override
+    public void exists(EventLoop eventLoop, ExistsSequenceListener existsSequenceListener, BatchPolicy batchPolicy, Key[] keys) throws AerospikeException {
+
+    }
+
     /**
      * Read entire record for specified key. The policy can be used to specify
      * timeouts.
      *
      * @param policy generic configuration parameters, pass in null for defaults
-     * @param key unique record identifier
+     * @param key    unique record identifier
      * @return if found, return record instance. If not found, return null.
      * @throws AerospikeException if read fails
      */
@@ -294,12 +348,17 @@ public class MockAerospikeClient implements IAerospikeClient {
         return data.get(key);
     }
 
+    @Override
+    public void get(EventLoop eventLoop, RecordListener recordListener, Policy policy, Key key) throws AerospikeException {
+
+    }
+
     /**
      * Read record header and bins for specified key. The policy can be used to
      * specify timeouts.
      *
-     * @param policy generic configuration parameters, pass in null for defaults
-     * @param key unique record identifier
+     * @param policy   generic configuration parameters, pass in null for defaults
+     * @param key      unique record identifier
      * @param binNames bins to retrieve
      * @return if found, return record instance. If not found, return null.
      * @throws AerospikeException if read fails
@@ -318,12 +377,17 @@ public class MockAerospikeClient implements IAerospikeClient {
         }
     }
 
+    @Override
+    public void get(EventLoop eventLoop, RecordListener recordListener, Policy policy, Key key, String... strings) throws AerospikeException {
+
+    }
+
     /**
      * Read record generation and expiration only for specified key. Bins are
      * not read. The policy can be used to specify timeouts.
      *
      * @param policy generic configuration parameters, pass in null for defaults
-     * @param key unique record identifier
+     * @param key    unique record identifier
      * @return if found, return record instance. If not found, return null.
      * @throws AerospikeException if read fails
      */
@@ -338,6 +402,11 @@ public class MockAerospikeClient implements IAerospikeClient {
 
     }
 
+    @Override
+    public void getHeader(EventLoop eventLoop, RecordListener recordListener, Policy policy, Key key) throws AerospikeException {
+
+    }
+
     /**
      * Read multiple records for specified keys in one batch call. The returned
      * records are in positional order with the original key array order. If a
@@ -345,7 +414,7 @@ public class MockAerospikeClient implements IAerospikeClient {
      * used to specify timeouts.
      *
      * @param policy generic configuration parameters, pass in null for defaults
-     * @param keys array of unique record identifiers
+     * @param keys   array of unique record identifiers
      * @return array of records
      * @throws AerospikeException if read fails
      * @deprecated Use {@link #get(BatchPolicy, Key[])} instead.
@@ -366,12 +435,22 @@ public class MockAerospikeClient implements IAerospikeClient {
      * used to specify timeouts and maximum concurrent threads.
      *
      * @param policy batch configuration parameters, pass in null for defaults
-     * @param keys array of unique record identifiers
+     * @param keys   array of unique record identifiers
      * @return array of records
      * @throws AerospikeException if read fails
      */
     public Record[] get(BatchPolicy policy, Key[] keys) throws AerospikeException {
         return get((Policy) policy, keys);
+    }
+
+    @Override
+    public void get(EventLoop eventLoop, RecordArrayListener recordArrayListener, BatchPolicy batchPolicy, Key[] keys) throws AerospikeException {
+
+    }
+
+    @Override
+    public void get(EventLoop eventLoop, RecordSequenceListener recordSequenceListener, BatchPolicy batchPolicy, Key[] keys) throws AerospikeException {
+
     }
 
     /**
@@ -380,8 +459,8 @@ public class MockAerospikeClient implements IAerospikeClient {
      * array order. If a key is not found, the positional record will be null.
      * The policy can be used to specify timeouts.
      *
-     * @param policy generic configuration parameters, pass in null for defaults
-     * @param keys array of unique record identifiers
+     * @param policy   generic configuration parameters, pass in null for defaults
+     * @param keys     array of unique record identifiers
      * @param binNames array of bins to retrieve
      * @return array of records
      * @throws AerospikeException if read fails
@@ -403,14 +482,24 @@ public class MockAerospikeClient implements IAerospikeClient {
      * The policy can be used to specify timeouts and maximum concurrent
      * threads.
      *
-     * @param policy batch configuration parameters, pass in null for defaults
-     * @param keys array of unique record identifiers
+     * @param policy   batch configuration parameters, pass in null for defaults
+     * @param keys     array of unique record identifiers
      * @param binNames array of bins to retrieve
      * @return array of records
      * @throws AerospikeException if read fails
      */
     public Record[] get(BatchPolicy policy, Key[] keys, String... binNames) throws AerospikeException {
         return get((Policy) policy, keys, binNames);
+    }
+
+    @Override
+    public void get(EventLoop eventLoop, RecordArrayListener recordArrayListener, BatchPolicy batchPolicy, Key[] keys, String... strings) throws AerospikeException {
+
+    }
+
+    @Override
+    public void get(EventLoop eventLoop, RecordSequenceListener recordSequenceListener, BatchPolicy batchPolicy, Key[] keys, String... strings) throws AerospikeException {
+
     }
 
     /**
@@ -420,7 +509,7 @@ public class MockAerospikeClient implements IAerospikeClient {
      * policy can be used to specify timeouts.
      *
      * @param policy generic configuration parameters, pass in null for defaults
-     * @param keys array of unique record identifiers
+     * @param keys   array of unique record identifiers
      * @return array of records
      * @throws AerospikeException if read fails
      * @deprecated Use {@link #getHeader(BatchPolicy, Key[])} instead.
@@ -441,12 +530,22 @@ public class MockAerospikeClient implements IAerospikeClient {
      * policy can be used to specify timeouts and maximum concurrent threads.
      *
      * @param policy batch configuration parameters, pass in null for defaults
-     * @param keys array of unique record identifiers
+     * @param keys   array of unique record identifiers
      * @return array of records
      * @throws AerospikeException if read fails
      */
     public Record[] getHeader(BatchPolicy policy, Key[] keys) throws AerospikeException {
         return getHeader((Policy) policy, keys);
+    }
+
+    @Override
+    public void getHeader(EventLoop eventLoop, RecordArrayListener recordArrayListener, BatchPolicy batchPolicy, Key[] keys) throws AerospikeException {
+
+    }
+
+    @Override
+    public void getHeader(EventLoop eventLoop, RecordSequenceListener recordSequenceListener, BatchPolicy batchPolicy, Key[] keys) throws AerospikeException {
+
     }
 
     /**
@@ -457,8 +556,8 @@ public class MockAerospikeClient implements IAerospikeClient {
      * Write operations are always performed first, regardless of operation
      * order relative to read operations.
      *
-     * @param policy write configuration parameters, pass in null for defaults
-     * @param key unique record identifier
+     * @param policy     write configuration parameters, pass in null for defaults
+     * @param key        unique record identifier
      * @param operations database operations to perform
      * @return record if there is a read in the operations list
      * @throws AerospikeException if command fails
@@ -484,6 +583,11 @@ public class MockAerospikeClient implements IAerospikeClient {
         return data.get(key);
     }
 
+    @Override
+    public void operate(EventLoop eventLoop, RecordListener recordListener, WritePolicy writePolicy, Key key, Operation... operations) throws AerospikeException {
+
+    }
+
     /**
      * Read all records in specified namespace and set. If the policy's
      * <code>concurrentNodes</code> is specified, each server node will be read
@@ -492,16 +596,21 @@ public class MockAerospikeClient implements IAerospikeClient {
      * This call will block until the scan is complete - callbacks are made
      * within the scope of this call.
      *
-     * @param policy scan configuration parameters, pass in null for defaults
+     * @param policy    scan configuration parameters, pass in null for defaults
      * @param namespace namespace - equivalent to database name
-     * @param setName optional set name - equivalent to database table
-     * @param callback read callback method - called with record data
-     * @param binNames optional bin to retrieve. All bins will be returned if not
-     * specified. Aerospike 2 servers ignore this parameter.
+     * @param setName   optional set name - equivalent to database table
+     * @param callback  read callback method - called with record data
+     * @param binNames  optional bin to retrieve. All bins will be returned if not
+     *                  specified. Aerospike 2 servers ignore this parameter.
      * @throws AerospikeException if scan fails
      */
     public void scanAll(ScanPolicy policy, String namespace, String setName, ScanCallback callback, String... binNames) throws AerospikeException {
         throw new UnsupportedOperationException("scanAll is not supported in MockAerospike");
+
+    }
+
+    @Override
+    public void scanAll(EventLoop eventLoop, RecordSequenceListener recordSequenceListener, ScanPolicy scanPolicy, String s, String s1, String... strings) throws AerospikeException {
 
     }
 
@@ -512,13 +621,13 @@ public class MockAerospikeClient implements IAerospikeClient {
      * This call will block until the scan is complete - callbacks are made
      * within the scope of this call.
      *
-     * @param policy scan configuration parameters, pass in null for defaults
-     * @param nodeName server node name
+     * @param policy    scan configuration parameters, pass in null for defaults
+     * @param nodeName  server node name
      * @param namespace namespace - equivalent to database name
-     * @param setName optional set name - equivalent to database table
-     * @param callback read callback method - called with record data
-     * @param binNames optional bin to retrieve. All bins will be returned if not
-     * specified. Aerospike 2 servers ignore this parameter.
+     * @param setName   optional set name - equivalent to database table
+     * @param callback  read callback method - called with record data
+     * @param binNames  optional bin to retrieve. All bins will be returned if not
+     *                  specified. Aerospike 2 servers ignore this parameter.
      * @throws AerospikeException if scan fails
      */
     public void scanNode(ScanPolicy policy, String nodeName, String namespace, String setName, ScanCallback callback, String... binNames)
@@ -533,13 +642,13 @@ public class MockAerospikeClient implements IAerospikeClient {
      * This call will block until the scan is complete - callbacks are made
      * within the scope of this call.
      *
-     * @param policy scan configuration parameters, pass in null for defaults
-     * @param node server node
+     * @param policy    scan configuration parameters, pass in null for defaults
+     * @param node      server node
      * @param namespace namespace - equivalent to database name
-     * @param setName optional set name - equivalent to database table
-     * @param callback read callback method - called with record data
-     * @param binNames optional bin to retrieve. All bins will be returned if not
-     * specified. Aerospike 2 servers ignore this parameter.
+     * @param setName   optional set name - equivalent to database table
+     * @param callback  read callback method - called with record data
+     * @param binNames  optional bin to retrieve. All bins will be returned if not
+     *                  specified. Aerospike 2 servers ignore this parameter.
      * @throws AerospikeException if transaction fails
      */
     public void scanNode(ScanPolicy policy, Node node, String namespace, String setName, ScanCallback callback, String... binNames)
@@ -548,145 +657,16 @@ public class MockAerospikeClient implements IAerospikeClient {
 
     }
 
-    /**
-     * Initialize large list operator. This operator can be used to create and
-     * manage a list within a single bin.
-     * <p>
-     * This method is only supported by Aerospike 3 servers.
-     *
-     * @param policy generic configuration parameters, pass in null for defaults
-     * @param key unique record identifier
-     * @param binName bin name
-     * @param userModule Lua function name that initializes list configuration
-     * parameters, pass null for default
-     * @deprecated Use
-     * {@link #getLargeList(WritePolicy policy, Key key, String binName, String userModule)}
-     * instead.
-     */
-    public LargeList getLargeList(Policy policy, Key key, String binName, String userModule) {
-        throw new UnsupportedOperationException("getLargeList is not supported in MockAerospike");
+    @Override
+    public void scanPartitions(ScanPolicy scanPolicy, PartitionFilter partitionFilter, String s, String s1, ScanCallback scanCallback, String... strings) throws AerospikeException {
+
     }
 
-    /**
-     * Initialize large list operator. This operator can be used to create and
-     * manage a list within a single bin.
-     * <p>
-     * This method is only supported by Aerospike 3 servers.
-     *
-     * @param policy write configuration parameters, pass in null for defaults
-     * @param key unique record identifier
-     * @param binName bin name
-     * @param userModule Lua function name that initializes list configuration
-     * parameters, pass null for default
-     */
-    public LargeList getLargeList(WritePolicy policy, Key key, String binName, String userModule) {
-        throw new UnsupportedOperationException("getLargeList is not supported in MockAerospike");
+    @Override
+    public void scanPartitions(EventLoop eventLoop, RecordSequenceListener recordSequenceListener, ScanPolicy scanPolicy, PartitionFilter partitionFilter, String s, String s1, String... strings) throws AerospikeException {
+
     }
 
-    /**
-     * Initialize large map operator. This operator can be used to create and
-     * manage a map within a single bin.
-     * <p>
-     * This method is only supported by Aerospike 3 servers.
-     *
-     * @param policy generic configuration parameters, pass in null for defaults
-     * @param key unique record identifier
-     * @param binName bin name
-     * @param userModule Lua function name that initializes list configuration
-     * parameters, pass null for default
-     * @deprecated Use
-     * {@link #getLargeMap(WritePolicy policy, Key key, String binName, String userModule)}
-     * instead.
-     */
-    public LargeMap getLargeMap(Policy policy, Key key, String binName, String userModule) {
-        throw new UnsupportedOperationException("getLargeMap is not supported in MockAerospike");
-    }
-
-    /**
-     * Initialize large map operator. This operator can be used to create and
-     * manage a map within a single bin.
-     * <p>
-     * This method is only supported by Aerospike 3 servers.
-     *
-     * @param policy write configuration parameters, pass in null for defaults
-     * @param key unique record identifier
-     * @param binName bin name
-     * @param userModule Lua function name that initializes list configuration
-     * parameters, pass null for default
-     */
-    public LargeMap getLargeMap(WritePolicy policy, Key key, String binName, String userModule) {
-        throw new UnsupportedOperationException("getLargeMap is not supported in MockAerospike");
-    }
-
-    /**
-     * Initialize large set operator. This operator can be used to create and
-     * manage a set within a single bin.
-     * <p>
-     * This method is only supported by Aerospike 3 servers.
-     *
-     * @param policy generic configuration parameters, pass in null for defaults
-     * @param key unique record identifier
-     * @param binName bin name
-     * @param userModule Lua function name that initializes list configuration
-     * parameters, pass null for default
-     * @deprecated Use
-     * {@link #getLargeSet(WritePolicy policy, Key key, String binName, String userModule)}
-     * instead.
-     */
-    public LargeSet getLargeSet(Policy policy, Key key, String binName, String userModule) {
-        throw new UnsupportedOperationException("getLargeSet is not supported in MockAerospike");
-    }
-
-    /**
-     * Initialize large set operator. This operator can be used to create and
-     * manage a set within a single bin.
-     * <p>
-     * This method is only supported by Aerospike 3 servers.
-     *
-     * @param policy write configuration parameters, pass in null for defaults
-     * @param key unique record identifier
-     * @param binName bin name
-     * @param userModule Lua function name that initializes list configuration
-     * parameters, pass null for default
-     */
-    public LargeSet getLargeSet(WritePolicy policy, Key key, String binName, String userModule) {
-        throw new UnsupportedOperationException("getLargeSet is not supported in MockAerospike");
-    }
-
-    /**
-     * Initialize large stack operator. This operator can be used to create and
-     * manage a stack within a single bin.
-     * <p>
-     * This method is only supported by Aerospike 3 servers.
-     *
-     * @param policy generic configuration parameters, pass in null for defaults
-     * @param key unique record identifier
-     * @param binName bin name
-     * @param userModule Lua function name that initializes list configuration
-     * parameters, pass null for default
-     * @deprecated Use
-     * {@link #getLargeStack(WritePolicy policy, Key key, String binName, String userModule)}
-     * instead.
-     */
-    public LargeStack getLargeStack(Policy policy, Key key, String binName, String userModule) {
-        throw new UnsupportedOperationException("getLargeStack is not supported in MockAerospike");
-    }
-
-    /**
-     * Initialize large stack operator. This operator can be used to create and
-     * manage a stack within a single bin.
-     * <p>
-     * This method is only supported by Aerospike 3 servers.
-     *
-     * @param policy write configuration parameters, pass in null for defaults
-     * @param key unique record identifier
-     * @param binName bin name
-     * @param userModule Lua function name that initializes list configuration
-     * parameters, pass null for default
-     */
-    public LargeStack getLargeStack(WritePolicy policy, Key key, String binName, String userModule) {
-        throw new UnsupportedOperationException("getLargeStack is not supported in MockAerospike");
-    }
 
     /**
      * Register package containing user defined functions with server. This
@@ -696,12 +676,12 @@ public class MockAerospikeClient implements IAerospikeClient {
      * <p>
      * This method is only supported by Aerospike 3 servers.
      *
-     * @param policy generic configuration parameters, pass in null for defaults
+     * @param policy     generic configuration parameters, pass in null for defaults
      * @param clientPath path of client file containing user defined functions,
-     * relative to current directory
+     *                   relative to current directory
      * @param serverPath path to store user defined functions on the server, relative
-     * to configured script directory.
-     * @param language language of user defined functions
+     *                   to configured script directory.
+     * @param language   language of user defined functions
      * @throws AerospikeException if register fails
      */
     public RegisterTask register(Policy policy, String clientPath, String serverPath, Language language) throws AerospikeException {
@@ -717,11 +697,11 @@ public class MockAerospikeClient implements IAerospikeClient {
      * <p>
      * This method is only supported by Aerospike 3 servers.
      *
-     * @param policy generic configuration parameters, pass in null for defaults
-     * @param key unique record identifier
-     * @param packageName server package name where user defined function resides
+     * @param policy       generic configuration parameters, pass in null for defaults
+     * @param key          unique record identifier
+     * @param packageName  server package name where user defined function resides
      * @param functionName user defined function
-     * @param args arguments passed in to user defined function
+     * @param args         arguments passed in to user defined function
      * @return return value of user defined function
      * @throws AerospikeException if transaction fails
      * @deprecated Use
@@ -741,16 +721,21 @@ public class MockAerospikeClient implements IAerospikeClient {
      * <p>
      * This method is only supported by Aerospike 3 servers.
      *
-     * @param policy write configuration parameters, pass in null for defaults
-     * @param key unique record identifier
-     * @param packageName server package name where user defined function resides
+     * @param policy       write configuration parameters, pass in null for defaults
+     * @param key          unique record identifier
+     * @param packageName  server package name where user defined function resides
      * @param functionName user defined function
-     * @param args arguments passed in to user defined function
+     * @param args         arguments passed in to user defined function
      * @return return value of user defined function
      * @throws AerospikeException if transaction fails
      */
     public Object execute(WritePolicy policy, Key key, String packageName, String functionName, Value... args) throws AerospikeException {
         throw new UnsupportedOperationException("execute is not supported in MockAerospike");
+    }
+
+    @Override
+    public void execute(EventLoop eventLoop, ExecuteListener executeListener, WritePolicy writePolicy, Key key, String s, String s1, Value... values) throws AerospikeException {
+
     }
 
     /**
@@ -761,9 +746,9 @@ public class MockAerospikeClient implements IAerospikeClient {
      * <p>
      * This method is only supported by Aerospike 3 servers.
      *
-     * @param policy scan configuration parameters, pass in null for defaults
-     * @param statement record filter
-     * @param packageName server package where user defined function resides
+     * @param policy       scan configuration parameters, pass in null for defaults
+     * @param statement    record filter
+     * @param packageName  server package where user defined function resides
      * @param functionName function name
      * @param functionArgs to pass to function name, if any
      * @throws AerospikeException if command fails
@@ -784,9 +769,9 @@ public class MockAerospikeClient implements IAerospikeClient {
      * <p>
      * This method is only supported by Aerospike 3 servers.
      *
-     * @param policy write configuration parameters, pass in null for defaults
-     * @param statement record filter
-     * @param packageName server package where user defined function resides
+     * @param policy       write configuration parameters, pass in null for defaults
+     * @param statement    record filter
+     * @param packageName  server package where user defined function resides
      * @param functionName function name
      * @param functionArgs to pass to function name, if any
      * @throws AerospikeException if command fails
@@ -796,6 +781,11 @@ public class MockAerospikeClient implements IAerospikeClient {
         throw new UnsupportedOperationException("execute is not supported in MockAerospike");
     }
 
+    @Override
+    public ExecuteTask execute(WritePolicy writePolicy, Statement statement, Operation... operations) throws AerospikeException {
+        return null;
+    }
+
     /**
      * Execute query on all server nodes and return record iterator. The query
      * executor puts records on a queue in separate threads. The calling thread
@@ -803,13 +793,18 @@ public class MockAerospikeClient implements IAerospikeClient {
      * <p>
      * This method is only supported by Aerospike 3 servers.
      *
-     * @param policy generic configuration parameters, pass in null for defaults
+     * @param policy    generic configuration parameters, pass in null for defaults
      * @param statement database query command
      * @return record iterator
      * @throws AerospikeException if query fails
      */
     public RecordSet query(QueryPolicy policy, Statement statement) throws AerospikeException {
         throw new UnsupportedOperationException("query is not supported in MockAerospike");
+    }
+
+    @Override
+    public void query(EventLoop eventLoop, RecordSequenceListener recordSequenceListener, QueryPolicy queryPolicy, Statement statement) throws AerospikeException {
+
     }
 
     /**
@@ -820,13 +815,23 @@ public class MockAerospikeClient implements IAerospikeClient {
      * <p>
      * This method is only supported by Aerospike 3 servers.
      *
-     * @param policy generic configuration parameters, pass in null for defaults
+     * @param policy    generic configuration parameters, pass in null for defaults
      * @param statement database query command
      * @return record iterator
      * @throws AerospikeException if query fails
      */
     public RecordSet queryNode(QueryPolicy policy, Statement statement, Node node) throws AerospikeException {
         throw new UnsupportedOperationException("queryNode is not supported in MockAerospike");
+    }
+
+    @Override
+    public RecordSet queryPartitions(QueryPolicy queryPolicy, Statement statement, PartitionFilter partitionFilter) throws AerospikeException {
+        return null;
+    }
+
+    @Override
+    public void queryPartitions(EventLoop eventLoop, RecordSequenceListener recordSequenceListener, QueryPolicy queryPolicy, Statement statement, PartitionFilter partitionFilter) throws AerospikeException {
+
     }
 
     /**
@@ -844,9 +849,9 @@ public class MockAerospikeClient implements IAerospikeClient {
      * This method is only supported by Aerospike 3 servers.
      * </p>
      *
-     * @param policy generic configuration parameters, pass in null for defaults
-     * @param statement database query command
-     * @param packageName server package where user defined function resides
+     * @param policy       generic configuration parameters, pass in null for defaults
+     * @param statement    database query command
+     * @param packageName  server package where user defined function resides
      * @param functionName aggregation function name
      * @param functionArgs arguments to pass to function name, if any
      * @return result iterator
@@ -864,11 +869,11 @@ public class MockAerospikeClient implements IAerospikeClient {
      * <p>
      * This method is only supported by Aerospike 3 servers.
      *
-     * @param policy generic configuration parameters, pass in null for defaults
+     * @param policy    generic configuration parameters, pass in null for defaults
      * @param namespace namespace - equivalent to database name
-     * @param setName optional set name - equivalent to database table
+     * @param setName   optional set name - equivalent to database table
      * @param indexName name of secondary index
-     * @param binName bin name that data is indexed on
+     * @param binName   bin name that data is indexed on
      * @param indexType underlying data type of secondary index
      * @throws AerospikeException if index create fails
      */
@@ -885,32 +890,47 @@ public class MockAerospikeClient implements IAerospikeClient {
      * <p>
      * This method is only supported by Aerospike 3 servers.
      *
-     * @param policy generic configuration parameters, pass in null for defaults
-     * @param namespace namespace - equivalent to database name
-     * @param setName optional set name - equivalent to database table
-     * @param indexName name of secondary index
-     * @param binName bin name that data is indexed on
-     * @param indexType underlying data type of secondary index
+     * @param policy              generic configuration parameters, pass in null for defaults
+     * @param namespace           namespace - equivalent to database name
+     * @param setName             optional set name - equivalent to database table
+     * @param indexName           name of secondary index
+     * @param binName             bin name that data is indexed on
+     * @param indexType           underlying data type of secondary index
      * @param indexCollectionType index collection type
      * @throws AerospikeException if index create fails
      */
     public IndexTask createIndex(Policy policy, String namespace, String setName, String indexName, String binName, IndexType indexType,
-            IndexCollectionType indexCollectionType) throws AerospikeException {
+                                 IndexCollectionType indexCollectionType) throws AerospikeException {
         throw new UnsupportedOperationException("createIndex is not supported in MockAerospike");
+    }
+
+    @Override
+    public void createIndex(EventLoop eventLoop, IndexListener indexListener, Policy policy, String s, String s1, String s2, String s3, IndexType indexType, IndexCollectionType indexCollectionType) throws AerospikeException {
+
     }
 
     /**
      * Delete secondary index. This method is only supported by Aerospike 3
      * servers.
      *
-     * @param policy generic configuration parameters, pass in null for defaults
+     * @param policy    generic configuration parameters, pass in null for defaults
      * @param namespace namespace - equivalent to database name
-     * @param setName optional set name - equivalent to database table
+     * @param setName   optional set name - equivalent to database table
      * @param indexName name of secondary index
+     * @return
      * @throws AerospikeException if index create fails
      */
-    public void dropIndex(Policy policy, String namespace, String setName, String indexName) throws AerospikeException {
+    public IndexTask dropIndex(Policy policy, String namespace, String setName, String indexName) throws AerospikeException {
         throw new UnsupportedOperationException("dropIndex is not supported in MockAerospike");
+    }
+
+    @Override
+    public void dropIndex(EventLoop eventLoop, IndexListener indexListener, Policy policy, String s, String s1, String s2) throws AerospikeException {
+
+    }
+
+    @Override
+    public void info(EventLoop eventLoop, InfoListener infoListener, InfoPolicy infoPolicy, Node node, String... strings) throws AerospikeException {
 
     }
 
@@ -918,11 +938,11 @@ public class MockAerospikeClient implements IAerospikeClient {
      * Create user with password and roles. Clear-text password will be hashed
      * using bcrypt before sending to server.
      *
-     * @param policy admin configuration parameters, pass in null for defaults
-     * @param user user name
+     * @param policy   admin configuration parameters, pass in null for defaults
+     * @param user     user name
      * @param password user password in clear-text format
-     * @param roles variable arguments array of role names. Valid roles are listed
-     * in Role.cs
+     * @param roles    variable arguments array of role names. Valid roles are listed
+     *                 in Role.cs
      * @throws AerospikeException if command fails
      */
     public void createUser(AdminPolicy policy, String user, String password, List<String> roles) throws AerospikeException {
@@ -934,7 +954,7 @@ public class MockAerospikeClient implements IAerospikeClient {
      * Remove user from cluster.
      *
      * @param policy admin configuration parameters, pass in null for defaults
-     * @param user user name
+     * @param user   user name
      * @throws AerospikeException if command fails
      */
     public void dropUser(AdminPolicy policy, String user) throws AerospikeException {
@@ -946,8 +966,8 @@ public class MockAerospikeClient implements IAerospikeClient {
      * Change user's password. Clear-text password will be hashed using bcrypt
      * before sending to server.
      *
-     * @param policy admin configuration parameters, pass in null for defaults
-     * @param user user name
+     * @param policy   admin configuration parameters, pass in null for defaults
+     * @param user     user name
      * @param password user password in clear-text format
      * @throws AerospikeException if command fails
      */
@@ -960,8 +980,8 @@ public class MockAerospikeClient implements IAerospikeClient {
      * Add roles to user's list of roles.
      *
      * @param policy admin configuration parameters, pass in null for defaults
-     * @param user user name
-     * @param roles role names. Valid roles are listed in Role.cs
+     * @param user   user name
+     * @param roles  role names. Valid roles are listed in Role.cs
      * @throws AerospikeException if command fails
      */
     public void grantRoles(AdminPolicy policy, String user, List<String> roles) throws AerospikeException {
@@ -973,8 +993,8 @@ public class MockAerospikeClient implements IAerospikeClient {
      * Remove roles from user's list of roles.
      *
      * @param policy admin configuration parameters, pass in null for defaults
-     * @param user user name
-     * @param roles role names. Valid roles are listed in Role.cs
+     * @param user   user name
+     * @param roles  role names. Valid roles are listed in Role.cs
      * @throws AerospikeException if command fails
      */
     public void revokeRoles(AdminPolicy policy, String user, List<String> roles) throws AerospikeException {
@@ -985,8 +1005,8 @@ public class MockAerospikeClient implements IAerospikeClient {
     /**
      * Create user defined role.
      *
-     * @param policy admin configuration parameters, pass in null for defaults
-     * @param roleName role name
+     * @param policy     admin configuration parameters, pass in null for defaults
+     * @param roleName   role name
      * @param privileges privileges assigned to the role.
      * @throws AerospikeException if command fails
      */
@@ -998,7 +1018,7 @@ public class MockAerospikeClient implements IAerospikeClient {
     /**
      * Drop user defined role.
      *
-     * @param policy admin configuration parameters, pass in null for defaults
+     * @param policy   admin configuration parameters, pass in null for defaults
      * @param roleName role name
      * @throws AerospikeException if command fails
      */
@@ -1010,8 +1030,8 @@ public class MockAerospikeClient implements IAerospikeClient {
     /**
      * Grant privileges to an user defined role.
      *
-     * @param policy admin configuration parameters, pass in null for defaults
-     * @param roleName role name
+     * @param policy     admin configuration parameters, pass in null for defaults
+     * @param roleName   role name
      * @param privileges privileges assigned to the role.
      * @throws AerospikeException if command fails
      */
@@ -1023,8 +1043,8 @@ public class MockAerospikeClient implements IAerospikeClient {
     /**
      * Revoke privileges from an user defined role.
      *
-     * @param policy admin configuration parameters, pass in null for defaults
-     * @param roleName role name
+     * @param policy     admin configuration parameters, pass in null for defaults
+     * @param roleName   role name
      * @param privileges privileges assigned to the role.
      * @throws AerospikeException if command fails
      */
@@ -1037,7 +1057,7 @@ public class MockAerospikeClient implements IAerospikeClient {
      * Retrieve roles for a given user.
      *
      * @param policy admin configuration parameters, pass in null for defaults
-     * @param user user name filter
+     * @param user   user name filter
      * @throws AerospikeException if command fails
      */
     public User queryUser(AdminPolicy policy, String user) throws AerospikeException {
@@ -1057,7 +1077,7 @@ public class MockAerospikeClient implements IAerospikeClient {
     /**
      * Retrieve role definition.
      *
-     * @param policy admin configuration parameters, pass in null for defaults
+     * @param policy   admin configuration parameters, pass in null for defaults
      * @param roleName role name filter
      * @throws AerospikeException if command fails
      */
@@ -1080,7 +1100,7 @@ public class MockAerospikeClient implements IAerospikeClient {
      * @return
      */
     private Map<String, Object> convertToMap(Bin[] bins) {
-        Map<String, Object> binMap = new HashMap<String, Object>(bins.length);
+        Map<String, Object> binMap = new HashMap<>(bins.length);
         for (Bin bin : bins) {
             if (bin.value instanceof BooleanValue) {
                 binMap.put(bin.name, bin.value.toLong());
@@ -1134,15 +1154,25 @@ public class MockAerospikeClient implements IAerospikeClient {
     }
 
     @Override
-    public LargeList getLargeList(WritePolicy policy, Key key, String binName) {
-        // TODO Auto-generated method stub
-        return null;
+    public void get(EventLoop eventLoop, BatchListListener batchListListener, BatchPolicy batchPolicy, List<BatchRead> list) throws AerospikeException {
+
     }
+
+    @Override
+    public void get(EventLoop eventLoop, BatchSequenceListener batchSequenceListener, BatchPolicy batchPolicy, List<BatchRead> list) throws AerospikeException {
+
+    }
+
 
     @Override
     public RegisterTask register(Policy policy, ClassLoader resourceLoader, String resourcePath, String serverPath, Language language)
             throws AerospikeException {
         // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public RegisterTask registerUdfString(Policy policy, String s, String s1, Language language) throws AerospikeException {
         return null;
     }
 
@@ -1154,6 +1184,11 @@ public class MockAerospikeClient implements IAerospikeClient {
     @Override
     public ResultSet queryAggregate(QueryPolicy policy, Statement statement) throws AerospikeException {
         // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public ResultSet queryAggregateNode(QueryPolicy queryPolicy, Statement statement, Node node) throws AerospikeException {
         return null;
     }
 }

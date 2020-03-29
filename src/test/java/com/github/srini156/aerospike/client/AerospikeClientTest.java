@@ -1,4 +1,4 @@
-package comy.github.srini156.aerospike.client;
+package com.github.srini156.aerospike.client;
 
 import com.aerospike.client.AerospikeClient;
 import com.github.srini156.aerospike.client.BaseAerospikeClientTest;

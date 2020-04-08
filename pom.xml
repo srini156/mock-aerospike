@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.srini156</groupId>
     <artifactId>mock-aerospike-java</artifactId>
-    <version>0.0.6</version>
+    <version>0.0.7-SNAPSHOT</version>
     <name>Mock Aerospike Java Client</name>
     <url>https://github.com/srini156/mock-aersopike</url>
     <description>Mock Aerospike Java Client - Allows for mocking &amp; unit testing</description>
@@ -15,7 +15,7 @@
     <scm>
         <developerConnection>scm:git:https://github.com/srini156/mock-aersopike.git</developerConnection>
         <url>https://github.com/srini156/mock-aersopike</url>
-        <tag>mock-aerospike-java-0.0.6</tag>
+        <tag>mock-aerospike-java-0.0.5-SNAPSHOT</tag>
     </scm>
     <licenses>
         <license>

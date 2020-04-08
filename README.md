@@ -1,4 +1,4 @@
-# mock-aersopike
+# mock-aerospike
 Just use `MockAerospikeClient` implementation for the interface `IAerospikeClient` in your unit tests.
 
 ## Goals
@@ -15,7 +15,7 @@ However, there are few issues pointed out - https://github.com/aerospike/aerospi
 Better approach to testing is to create `MockAerospikeClient` which implements `IAerospikeClient`, thus avoiding mocking `RecordSet` and `Record` itself.
 
 ## Implementation
-`MockAerospikeClient` implements `IAerospikeClient` (version - `3.2.1`)  
+`MockAerospikeClient` implements `IAerospikeClient` (version - `4.4.9`)  
 Currently, `MockAerospikeClient` supports the following methods:
 - put
 - get
